@@ -1,4 +1,5 @@
-/* ==== CODEPEN-PROOF QUIZ INIT (3 questions only, same visuals) ==== */
+// Index.html script:
+/* ==== Quiz (QUESTIONS with images) + 3 results from window.allTours ==== */
 (function () {
   var tries = 0;
 
@@ -6,6 +7,7 @@
     var viewport = document.getElementById("viewport");
     var backBtn = document.getElementById("backBtn");
     var nextBtn = document.getElementById("nextBtn");
+    var progressEl = document.getElementById("progress");
 
     // Retry until DOM ready
     if (!viewport || !backBtn || !nextBtn) {
@@ -13,7 +15,7 @@
       return;
     }
 
-    /* --- Data (ONLY 3 QUESTIONS) --- */
+    /* --- Data: 3 QUESTIONS (2 choices each) --- */
     var QUESTIONS = [
       {
         id: "vibe",
@@ -68,284 +70,215 @@
       },
     ];
 
-    /* --- TOURS (unchanged) --- */
-    var TOURS = [
-      {
-        id: "tangkoko",
-        name: "Tangkoko Wildlife & Culture",
-        img: "https://www.civitatis.com/f/indonesia/manado/tour-3-dias-tangkoko-589x392.jpg",
-        location: "Tangkoko • Bitung",
-        days: 4,
-        priceUSD: 500,
-        priceDisplay: "$500",
-        tags: ["nature", "wildlife", "family", "culture", "balanced", "access"],
-        highlights: [
-          "Tarsier night walk",
-          "Black macaques tracking",
-          "Batik workshop",
-        ],
-      },
-      {
-        id: "minahasa",
-        name: "Minahasa Highlands Explorer",
-        img: "https://www.ganggaisland.com/wp-content/uploads/2018/09/Jetty-Pool-Aerial-1200x800.jpg",
-        location: "Minahasa Highlands",
-        days: 5,
-        priceUSD: 650,
-        priceDisplay: "$650",
-        tags: [
-          "adventure",
-          "mountain",
-          "volcano",
-          "culture",
-          "budget",
-          "active",
-        ],
-        highlights: [
-          "Mahawu crater hike",
-          "Tondano & Linow lakes",
-          "Village food tour",
-        ],
-      },
-      {
-        id: "bunaken",
-        name: "Bunaken Reef & Relax",
-        img: "https://murexdive.com/wp-content/uploads/2016/03/Green-Sea-Turtle-Portrait-at-Bunaken-National-Park-with-Murex-Manado.jpg",
-        location: "Bunaken Marine Park",
-        days: 6,
-        priceUSD: 750,
-        priceDisplay: "From $750",
-        tags: ["underwater", "snorkel", "relax", "nature", "comfort", "beach"],
-        highlights: [
-          "2 days guided snorkeling",
-          "Sunset cruise & beach picnic",
-          "Seaside spa hour",
-        ],
-      },
-      {
-        id: "siladen",
-        name: "Siladen Sanctuary Luxe Escape",
-        img: "https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop",
-        location: "Siladen Island",
-        days: 4,
-        priceUSD: 1190,
-        priceDisplay: "From $1,190",
-        tags: ["luxury", "relax", "beach", "wellness", "underwater", "comfort"],
-        highlights: [
-          "Private villa",
-          "Chef’s tasting dinner",
-          "Private reef snorkel",
-        ],
-      },
-    ];
+    // State
+    var i = 0; // current index
+    var answers = Array(QUESTIONS.length).fill(null); // 0 for first choice, 1 for second
+    var pickedTags = {}; // aggregated tags by question id
 
-    /* --- State --- */
-    var step = 0;
-    var answers = {};
+    // Helpers
+    function clamp(x, min, max) {
+      return Math.max(min, Math.min(max, x));
+    }
 
-    /* --- Functions --- */
     function renderStep() {
-      var q = QUESTIONS[step];
-      var selected = answers[q.id] && answers[q.id].label;
+      if (i >= QUESTIONS.length) return renderResult();
 
-      var html =
-        '<div class="q-head">' +
-        '<div class="q-index">Question ' +
-        (step + 1) +
-        " of " +
-        QUESTIONS.length +
-        "</div>" +
-        '<h3 class="q-title">' +
-        q.title +
-        "</h3>" +
-        '<p class="q-sub">' +
-        (q.subtitle || "") +
-        "</p>" +
-        "</div>" +
-        '<div class="choice-grid" role="list">';
-      for (var i = 0; i < q.choices.length; i++) {
-        var c = q.choices[i];
-        html +=
-          '<button class="choice-card ' +
-          (selected === c.label ? "is-selected" : "") +
-          '" role="listitem" data-idx="' +
-          i +
-          '" aria-pressed="' +
-          (selected === c.label ? "true" : "false") +
-          '">' +
-          '<img alt="' +
-          c.label +
-          '" loading="lazy" src="' +
-          c.img +
-          '">' +
-          '<span class="choice-card__label">' +
-          c.label +
-          "</span>" +
-          '<span class="choice-card__check" aria-hidden="true">✓</span>' +
-          "</button>";
-      }
-      html += "</div>";
+      var q = QUESTIONS[i];
+      var selected = answers[i]; // 0/1 or null
+
+      var html = `
+        <div class="quiz-step">
+          <div class="quiz-head">
+            <div class="quiz-progress">${i + 1} / ${QUESTIONS.length}</div>
+            <h3 class="quiz-title">${q.title}</h3>
+            ${q.subtitle ? `<p class="q-sub">${q.subtitle}</p>` : ""}
+          </div>
+
+          <div class="choice-grid" role="list">
+            ${q.choices
+              .map(function (c, idx) {
+                var isSel = selected === idx ? "is-selected" : "";
+                return `
+                <button class="choice-card ${isSel}" role="listitem"
+                        data-choice="${idx}" aria-pressed="${isSel ? "true" : "false"}">
+                  <img alt="${c.label}" loading="lazy" src="${c.img}">
+                  <span class="choice-card__label">${c.label}</span>
+                  <span class="choice-card__check" aria-hidden="true">✓</span>
+                </button>`;
+              })
+              .join("")}
+          </div>
+        </div>
+      `;
       viewport.innerHTML = html;
 
-      backBtn.disabled = step === 0;
-      nextBtn.disabled = !selected;
+      // Enable/disable nav
+      backBtn.disabled = i === 0;
+      nextBtn.disabled = selected == null;
 
-      var cards = viewport.querySelectorAll(".choice-card");
-      for (var j = 0; j < cards.length; j++) {
-        (function (btn, idx) {
-          btn.addEventListener("click", function () {
-            var all = viewport.querySelectorAll(".choice-card");
-            for (var k = 0; k < all.length; k++) {
-              all[k].classList.remove("is-selected");
-              all[k].setAttribute("aria-pressed", "false");
-            }
-            btn.classList.add("is-selected");
-            btn.setAttribute("aria-pressed", "true");
+      // Bind choice clicks
+      viewport.querySelectorAll(".choice-card").forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+          var val = Number(e.currentTarget.getAttribute("data-choice")); // 0 or 1
+          answers[i] = val;
 
-            var choice = QUESTIONS[step].choices[idx];
-            answers[QUESTIONS[step].id] = {
-              label: choice.label,
-              tags: choice.tags,
-            };
-            nextBtn.disabled = false;
+          // Mark selection
+          viewport.querySelectorAll(".choice-card").forEach(function (b) {
+            var isSel = Number(b.getAttribute("data-choice")) === val;
+            b.classList.toggle("is-selected", isSel);
+            b.setAttribute("aria-pressed", isSel ? "true" : "false");
           });
 
-          // tilt effect
-          btn.addEventListener("mousemove", function (e) {
-            var r = btn.getBoundingClientRect();
-            var rx = ((e.clientX - r.left) / r.width - 0.5) * 6;
-            var ry = ((e.clientY - r.top) / r.height - 0.5) * -6;
-            btn.style.transform =
-              "perspective(700px) rotateX(" +
-              ry +
-              "deg) rotateY(" +
-              rx +
-              "deg) translateY(-6px)";
-          });
-          btn.addEventListener("mouseleave", function () {
-            btn.style.transform = "";
-          });
-        })(cards[j], j);
-      }
-    }
-
-    function computeAndRenderResults() {
-      var weights = {};
-      Object.keys(answers).forEach(function (k) {
-        answers[k].tags.forEach(function (t) {
-          weights[t] = (weights[t] || 0) + 1;
-        });
-      });
-      if (weights.luxury) weights.luxury += 1;
-      if (weights.comfort) weights.comfort += 1;
-      if (weights.budget) weights.budget += 1;
-
-      var scored = TOURS.map(function (t) {
-        var s = 0;
-        t.tags.forEach(function (tag) {
-          if (weights[tag]) s += weights[tag];
-        });
-        if (
-          (weights.family && t.tags.indexOf("family") > -1) ||
-          (weights.couple &&
-            (t.tags.indexOf("relax") > -1 || t.tags.indexOf("comfort") > -1))
-        )
-          s += 0.5;
-        t.score = s;
-        return t;
-      }).sort(function (a, b) {
-        return b.score - a.score;
-      });
-
-      var top3 = scored.slice(0, 3).sort(function (a, b) {
-        return a.priceUSD - b.priceUSD;
-      });
-
-      var html =
-        '<div class="results__head">' +
-        '<h3 class="q-title">Your Matches</h3>' +
-        '<div class="results__actions">' +
-        '<button class="btn btn--light-outline" id="retake">Retake Quiz</button>' +
-        '<a class="btn  brn" href="#tours">Browse All Tours</a>' +
-        "</div>" +
-        "</div>" +
-        '<p class="q-sub">You can retake the quiz anytime.</p>' +
-        '<div class="results__grid" role="list">';
-      for (var i = 0; i < top3.length; i++) {
-        var t = top3[i];
-        html +=
-          '<article class="tour-card" role="listitem">' +
-          '<div class="tour-media"><img src="' +
-          t.img +
-          '" alt="' +
-          t.name +
-          '"><div class="tour-badge">' +
-          t.days +
-          " days</div></div>" +
-          '<div class="tour-body">' +
-          '<h3 class="tour-title">' +
-          t.name +
-          "</h3>" +
-          '<p class="tour-meta">' +
-          t.location +
-          " • <strong>" +
-          t.priceDisplay +
-          "</strong></p>" +
-          '<ul class="tour-highlights">' +
-          t.highlights
-            .map(function (h) {
-              return "<li>" + h + "</li>";
-            })
-            .join("") +
-          "</ul>" +
-          '<div class="tour-actions"><a href="#tours" class="btn btn--primary aa">Learn more</a></div>' +
-          "</div>" +
-          "</article>";
-      }
-      html += "</div>";
-      viewport.innerHTML = html;
-
-      var r = document.getElementById("retake");
-      if (r)
-        r.addEventListener("click", function () {
-          answers = {};
-          step = 0;
-          goTo(0);
+          // save tags for scoring (optional future use)
+          pickedTags[q.id] = (q.choices[val] && q.choices[val].tags) || [];
+          nextBtn.disabled = false;
         });
 
-      backBtn.disabled = true;
-      nextBtn.disabled = true;
-    }
+        // small tilt effect (optional)
+        btn.addEventListener("mousemove", function (e) {
+          var r = btn.getBoundingClientRect();
+          var rx = ((e.clientX - r.left) / r.width - 0.5) * 6;
+          var ry = ((e.clientY - r.top) / r.height - 0.5) * -6;
+          btn.style.transform =
+            "perspective(700px) rotateX(" +
+            ry +
+            "deg) rotateY(" +
+            rx +
+            "deg) translateY(-6px)";
+        });
+        btn.addEventListener("mouseleave", function () {
+          btn.style.transform = "";
+        });
+      });
 
-    function next() {
-      if (step < QUESTIONS.length - 1) {
-        step++;
-        renderStep();
-      } else {
-        step = QUESTIONS.length;
-        computeAndRenderResults();
+      // Progress bar
+      if (progressEl) {
+        var pct = Math.round((i / QUESTIONS.length) * 100);
+        progressEl.style.width = pct + "%";
       }
     }
 
-    function back() {
-      if (step > 0) {
-        step--;
-        renderStep();
-      }
-    }
-
-    function goTo(i) {
-      step = Math.max(0, Math.min(i, QUESTIONS.length));
-      if (step === QUESTIONS.length) {
-        computeAndRenderResults();
-        return;
-      }
+    function goTo(idx) {
+      i = clamp(idx, 0, QUESTIONS.length);
       renderStep();
+    }
+    function back() {
+      if (i > 0) goTo(i - 1);
+    }
+    function next() {
+      if (i < QUESTIONS.length && answers[i] == null) return;
+      goTo(i + 1);
     }
 
     backBtn.addEventListener("click", back);
     nextBtn.addEventListener("click", next);
 
+    // --- Result mapping based on bit pattern (A=0, B=1) ---
+    function bitIndex() {
+      var idx = 0;
+      for (var k = 0; k < answers.length; k++) {
+        idx = (idx << 1) | (answers[k] || 0);
+      }
+      return idx; // 0..(2^n - 1)
+    }
+
+    function getAllTours() {
+      // ONLY read user's manual data
+      if (Array.isArray(window.allTours) && window.allTours.length > 0)
+        return window.allTours;
+      return null;
+    }
+
+    function renderResult() {
+      var totalOutcomes = Math.pow(2, QUESTIONS.length);
+      var idx = bitIndex();
+
+      var tours = getAllTours();
+      if (!tours) {
+        viewport.innerHTML = `
+          <div class="quiz-result">
+            <h3>Set up your tours data</h3>
+            <p class="muted">
+              Hasil kuis diambil <strong>hanya</strong> dari <code>window.allTours</code> di <code>tours.js</code>.<br>
+              Definisikan <code>window.allTours = [ ... ]</code> dulu.
+            </p>
+            <div class="result-actions">
+              <a href="allTours.html" class="btn btn--primary">Buka All Tours</a>
+            </div>
+          </div>`;
+        backBtn.disabled = true;
+        nextBtn.disabled = true;
+        if (progressEl) progressEl.style.width = "100%";
+        return;
+      }
+
+      // Ambil 3 rekomendasi tersebar
+      var picks = [];
+      var offsets = [0, 7, 13]; // spread
+      for (var p = 0; p < 3; p++) {
+        var which = (idx + offsets[p]) % tours.length;
+        picks.push(tours[which]);
+      }
+
+      var explainBits = answers
+        .map(function (v) {
+          return v === 1 ? "1" : "0";
+        })
+        .join("");
+      var cards = picks
+        .map(function (pick) {
+          return `
+          <article class="tour-card rec-card">
+            <div class="tour-media">
+              <img src="${pick.image}" alt="${pick.title}">
+              ${pick.badge ? `<div class="tour-badge">${pick.badge}</div>` : ""}
+            </div>
+            <div class="tour-body">
+              <h4 class="tour-title">${pick.title}</h4>
+              <p class="tour-meta">
+                ${pick.duration ? `⏱ ${pick.duration}` : ""}
+                ${
+                  pick.price
+                    ? (pick.duration ? " • " : "") + `💰 ${pick.price}`
+                    : ""
+                }
+              </p>
+              <div class="tour-actions">
+                <a href="#" class="btn btn--primary">Book Now</a>
+                <a href="allTours.html" class="btn btn--ghost">Explore all</a>
+              </div>
+            </div>
+          </article>`;
+        })
+        .join("");
+
+      var html = `
+        <div class="quiz-result">
+          <h3>Your matches are ready</h3>
+          <div class="results__grid">${cards}</div>
+          <div class="result-actions">
+            <button id="restartBtn" class="btn btn--light-outline">Restart quiz</button>
+            <a href="allTours.html" class="btn btn--primary">Browse All Tours</a>
+          </div>
+        </div>`;
+      viewport.innerHTML = html;
+
+      backBtn.disabled = true;
+      nextBtn.disabled = true;
+      var restart = document.getElementById("restartBtn");
+      if (restart)
+        restart.addEventListener("click", function () {
+          answers = Array(QUESTIONS.length).fill(null);
+          i = 0;
+          goTo(0);
+          backBtn.disabled = true;
+          nextBtn.disabled = true;
+        });
+
+      if (progressEl) progressEl.style.width = "100%";
+    }
+
+    // Start
     goTo(0);
   }
 

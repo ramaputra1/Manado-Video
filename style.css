@@ -216,6 +216,7 @@ body {
 }
 
 .btn--primary {
+  margin-top: 25px;
   background-color: white;
   color: #00296b;
   font-size: 0.8rem;
@@ -230,6 +231,7 @@ body {
   cursor: pointer;
 }
 .btn--ghost {
+  margin-top: 25px;
   display: flex;
   align-items: center;
   /* background: linear-gradient(135deg, var(--brand-2), var(--brand-1)); */
@@ -245,7 +247,10 @@ body {
   border-color: rgba(255, 255, 255, 0.22);
 }
 .btn--light-outline:hover {
-  background: rgba(255, 255, 255, 0.08);
+  /* background-color: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 41, 107, 0.9); */
+  filter: brightness(1.5);
+  transform: translateY(-1px);
 }
 
 /* =========================

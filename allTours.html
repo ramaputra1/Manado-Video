@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Tours — Manado Tours</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Poppins:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="allTours.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="contact">
+        <p>Call Us 808 203 551</p>
+        <p>|</p>
+        <p>Contact</p>
+      </div>
+      <div class="nav">
+        <a href="index.html" class="brand" aria-label="Manado Tours Home">
+          <img src="img/Logo_Manado Tours_White.png" alt="" class="logoimg" />
+          <span class="brand__word">Manado Tours</span>
+        </a>
+        <nav class="nav__links">
+          <a href="index.html#quiz" class="link">Trip Matcher</a>
+          <a href="index.html#promise" class="link">Our Promise</a>
+          <a href="allTours.html" class="btn btn--sm btn--light-outline"
+            >All Tours</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <section class="section results" aria-labelledby="tours-heading">
+      <div class="container">
+        <div class="results__head">
+          <h2 id="tours-heading">All Tours</h2>
+          <p class="muted">
+            These are placeholder tours. Click any card to open the details
+            modal. Edit content in <code>tours.js</code>.
+          </p>
+        </div>
+
+        <!-- Optional actions (e.g., sort/filter) could go here -->
+        <div
+          class="results__actions"
+          style="display: flex; align-items: center"
+        >
+          <!-- <button class="btn btn--ghost" onclick="location.reload()">Shuffle</button> -->
+          <a href="index.html" class="btn btn--primary">Back to Home</a>
+        </div>
+
+        <div
+          class="results__grid"
+          id="allToursGrid"
+          role="list"
+          aria-live="polite"
+        ></div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="container footer__grid">
+        <div>
+          <div class="brand brand--footer"></div>
+          <p class="muted">Prototype preview. © 2025 Manado Tours.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="tours.js"></script>
+  </body>
+</html>

@@ -761,7 +761,7 @@
           <h3 class="tour-title">${t.title || "Untitled Tour"}</h3>
           <p class="tour-meta">
             ${t.duration ? `⏱ ${t.duration}` : ""}
-            ${t.price ? (t.duration ? " • " : "") + `💰 ${t.price}` : ""}
+            ${t.price ? (t.duration ? " • " : "") + `${t.price}` : ""}
           </p>
           ${
             Array.isArray(t.highlights) && t.highlights.length
@@ -814,11 +814,7 @@
           <h3>${tour.title || "Untitled Tour"}</h3>
           <p class="tour-meta">
             ${tour.duration ? `⏱ ${tour.duration}` : ""}
-            ${
-              tour.price
-                ? (tour.duration ? " • " : "") + `💰 ${tour.price}`
-                : ""
-            }
+            ${tour.price ? (tour.duration ? " • " : "") + `${tour.price}` : ""}
           </p>
           <div class="muted" style="margin: .5rem 0 1rem;">
             ${

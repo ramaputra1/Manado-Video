@@ -239,7 +239,7 @@
                 ${pick.duration ? `⏱ ${pick.duration}` : ""}
                 ${
                   pick.price
-                    ? (pick.duration ? " • " : "") + `💰 ${pick.price}`
+                    ? (pick.duration ? " • " : "") + `${pick.price}`
                     : ""
                 }
               </p>
